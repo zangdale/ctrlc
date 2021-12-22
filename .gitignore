@@ -1,0 +1,7 @@
+
+*.db
+*.backup
+*.log
+
+ctrlc
+ctrlc.exe

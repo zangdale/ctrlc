@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>都复制了啥!!!</title>
+</head>
+
+<style>
+
+</style>
+
+<body>
+<div id="app"></div>
+
+<template id="body">
+
+    <h1>{{msg}}</h1>
+
+</template>
+
+<script src="vue.global.js"></script>
+<script>
+    Vue.createApp({
+        template:'#body',
+        data(){
+            return {
+                msg:"hello ctrlc !!!",
+                ctrlcList:[]
+            }
+        },
+        props:{
+
+        },
+        computed:{
+
+        },
+        watch:{
+
+        },
+        methods:{
+
+        }
+    }).mount('#app');
+</script>
+</body>
+</html>
