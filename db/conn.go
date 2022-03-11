@@ -1,21 +1,21 @@
 package db
 
 import (
-	"context"
-	"ctrlc/ent"
+	"database/sql"
 	"fmt"
 	"os"
 	"path/filepath"
 
-	_ "github.com/mattn/go-sqlite3"
+	"github.com/jmoiron/sqlx"
 	"github.com/rs/zerolog/log"
+	"modernc.org/sqlite"
 )
 
-var client *ent.Client
-
+var dbc *sqlx.DB
 var dbFile = "file:ent.db?_fk=1"
 
 func init() {
+	sql.Register("sqlite3", &sqlite.Driver{})
 	f := os.Getenv("ctrlc_db_file")
 	if f != "" {
 		dbFile = f
@@ -27,22 +27,21 @@ func init() {
 	}
 
 	dbFile = fmt.Sprintf("file:%s?_fk=1", filepath.Join(dir, "ent.db"))
+	log.Info().Str("dbFile", dbFile).Msg("show db")
 }
 
 func Init() {
 	var err error
-	client, err = ent.Open("sqlite3", dbFile)
+	dbc, err = sqlx.Connect("sqlite3", dbFile)
 	if err != nil {
-		log.Panic().Err(err).Msg("failed opening connection to sqlite")
+		log.Fatal().Err(err).Msg("failed opening connection to sqlite")
 	}
-	if err := client.Schema.Create(context.Background()); err != nil {
-		log.Fatal().Err(err).Msg("failed creating schema resources")
-	}
+	dbc.MustExec(schema)
 }
 
-func Close() error {
-	if client == nil {
-		return nil
+func Close() {
+	if dbc == nil {
+		return
 	}
-	return client.Close()
+	dbc.Close()
 }
