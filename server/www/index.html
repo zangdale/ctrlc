@@ -48,7 +48,8 @@
           });
           source.addEventListener("message", function (event) {
             console.log(event.data);
-            msgs.push(event.data);
+            // msgs.push(event.data);// 向后追加
+            msgs.unshift(event.data); // 向前追加
             // console.log("msgs:", msgs);
           });
         },
