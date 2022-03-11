@@ -3,14 +3,16 @@ module ctrlc
 go 1.17
 
 require (
-	entgo.io/ent v0.9.1
 	github.com/atotto/clipboard v0.1.4
 	github.com/judwhite/go-svc v1.2.1
 )
 
 require (
+	github.com/go-sql-driver/mysql v1.5.1-0.20200311113236-681ffa848bae // indirect
+	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
+	github.com/lib/pq v1.10.2 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
 	golang.org/x/mod v0.4.2 // indirect
@@ -29,8 +31,7 @@ require (
 
 require (
 	github.com/jmoiron/sqlx v1.3.4
-	github.com/mattn/go-sqlite3 v1.14.10
 	github.com/rs/zerolog v1.26.0
-	golang.org/x/sys v0.0.0-20211007075335-d3039528d8ac // indirect
+	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
 	modernc.org/sqlite v1.14.8
 )

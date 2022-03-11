@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"ctrlc/db"
+	"ctrlc/server"
 	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 
@@ -95,11 +97,34 @@ func (p *params) Start() error {
 				if text != "" && oldText != text {
 					oldText = text
 					log.Debug().Msg(text)
+					server.AddMsg(text)
 					db.SaveCopyMsg(p.ctx, text)
 				}
 
 			}
 		}
+	}()
+
+	port := ":9977"
+	server := &http.Server{Addr: port, Handler: server.Init()}
+	go func() {
+		e := make(chan error)
+		go func(re chan error) {
+			if err := server.ListenAndServe(); err != nil {
+				re <- err
+			}
+		}(e)
+		log.Info().Str("port", port).Msg("http server")
+
+		select {
+		case <-p.ctx.Done():
+			if err := server.Close(); err != nil {
+				log.Error().Err(err).Msg("http close")
+			}
+		case err := <-e:
+			log.Error().Err(err).Msg("http server")
+		}
+
 	}()
 
 	return nil
