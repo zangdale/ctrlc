@@ -1,8 +1,11 @@
 package server
 
 import (
+	"ctrlc/db"
 	"fmt"
 	"net/http"
+	"net/url"
+	"strconv"
 
 	"github.com/rs/zerolog"
 )
@@ -57,10 +60,36 @@ func msgHandle(w http.ResponseWriter, req *http.Request) {
 
 func getHandle(w http.ResponseWriter, req *http.Request) {
 	resp := zerolog.New(w)
-	resp.Info().Str("handle", "get").Msg("ok")
+
+	count := QueryInt(req.URL, "count", 20)
+	offset := QueryInt(req.URL, "offset", 0)
+	searchStr := QueryStr(req.URL, "search", "")
+
+	res, err := db.GetMsgs(count, offset, searchStr)
+	if err != nil {
+		resp.Info().Err(err).Str("handle", "get").Msg("error")
+		return
+	}
+
+	resp.Info().Str("handle", "get").Interface("data", res).Msg("ok")
 }
 
-func searchHandle(w http.ResponseWriter, req *http.Request) {
-	resp := zerolog.New(w)
-	resp.Info().Str("handle", "search").Msg("ok")
+func QueryInt(u *url.URL, key string, def int) int {
+	countStr := u.Query().Get(key)
+	res := def
+	if countStr != "" {
+		i, _ := strconv.Atoi(countStr)
+		if i > 0 {
+			res = i
+		}
+	}
+	return res
+}
+func QueryStr(u *url.URL, key string, def string) string {
+	countStr := u.Query().Get(key)
+	res := def
+	if countStr != "" {
+		res = countStr
+	}
+	return res
 }

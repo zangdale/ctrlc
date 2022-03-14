@@ -19,7 +19,7 @@ func Init() *http.ServeMux {
 	mux.Handle("/", http.FileServer(http.FS(fsys)))
 	mux.HandleFunc("/msgs", msgHandle)
 	mux.HandleFunc("/get", getHandle)
-	mux.HandleFunc("/search", searchHandle)
+	// mux.HandleFunc("/search", searchHandle)
 
 	return mux
 }

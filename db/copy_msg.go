@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS copy_msgs (
 	created_at datetime NOT NULL
 )`
 
-type Backups struct {
+type CopyMags struct {
 	ID       uint64    `db:"id"`
 	Body     string    `db:"body"`
 	From     string    `db:"from"`
@@ -30,6 +30,20 @@ func SaveCopyMsg(ctx context.Context, text string) error {
 	_, err := dbc.MustExec("INSERT INTO copy_msgs (body, 'from', created_at) VALUES ($1,$2,$3)",
 		text, fromSystem, time.Now()).LastInsertId()
 	return err
+}
+
+func GetMsgs(count, offset int, search string) ([]*CopyMags, error) {
+	var res = []*CopyMags{}
+	var err error
+	if search == "" {
+		err = dbc.Select(&res, "SELECT * FROM copy_msgs ORDER BY created_at DESC LIMIT $1 OFFSET $2 ",
+			count, offset)
+	} else {
+		err = dbc.Select(&res, "SELECT * FROM copy_msgs WHERE body LIKE $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3",
+			"%"+search+"%", count, offset)
+	}
+
+	return res, err
 }
 
 /*
