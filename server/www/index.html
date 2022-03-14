@@ -1,145 +1,149 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <title>都复制了啥!!!</title>
-  </head>
 
-  <style>
-    body {
-      padding: 0;
-      margin: 0;
+<head>
+  <meta charset="UTF-8" />
+  <title>都复制了啥!!!</title>
+</head>
+
+<style>
+  body {
+    padding: 0;
+    margin: 0;
+  }
+
+  #left {
+    float: left;
+    width: 50%;
+    height: 100%;
+    background-color: rgba(46, 53, 41, 0.096);
+  }
+
+  #right {
+    float: left;
+    width: 50%;
+    height: 100%;
+    background-color: rgb(178, 178, 224);
+  }
+</style>
+
+<body>
+  <div id="app"></div>
+
+  <template id="body">
+    <div id="left">
+      <h1>{{title}}</h1>
+      <ol>
+        <li v-for="msg in ctrlcMsgs">{{ msg }}</li>
+      </ol>
+    </div>
+    <div id="right">
+      <h1>{{search}}</h1>
+      <span id="zuo">
+        <input type="text" name="search" v-model="searchMsg" />
+        <button type="submit" @click="getAndSearchMsgs">查询</button>
+      </span>
+      <span id="you">
+        <p>count:</p>
+        <input type="number" v-model="count" />
+        <p>offset:</p>
+        <input type="number" v-model="offset" />
+      </span>
+      <ol>
+        <li v-for="msg in searchMsgs.data.data">{{ msg.Body }}</li>
+      </ol>
+    </div>
+  </template>
+
+  <script src="vue.global.js"></script>
+  <script src="axios.min.js"></script>
+  <script>
+    Vue.createApp({
+      template: "#body",
+      data() {
+        return {
+          title: "hello ctrlc !!!",
+          search: "search !!!",
+          ctrlcMsgs: [],
+          searchMsg: "",
+          count: 30,
+          offset: 0,
+          searchMsgs: null,
+        };
+      },
+      props: {},
+      computed: {},
+      watch: {},
+      methods: {
+        getAndSearchMsgs() {
+          axios
+        .get("/get", {
+          params: {
+            count: this.count,
+            offset: this.offset,
+            search: this.search,
+          },
+        })
+        .then(function (response) {
+          // console.log(response);
+          this.searchMsgs=response.data;
+          console.log(this.searchMsgs);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+        },
+      },
+      created() {
+        // console.log(this.ctrlcMsgs);
+        var msgs = this.ctrlcMsgs; // == msgs=this.ctrlcMsgs 都是赋值指针类型
+        const source = new EventSource("/msgs");
+        source.addEventListener("open", function (event) {
+          console.log("eventsource connection open");
+        });
+        source.addEventListener("error", function (event) {
+          if (event.target.readyState === 0) {
+            console.log("reconnecting to eventsource");
+          } else {
+            console.error("eventsource error");
+          }
+        });
+        source.addEventListener("message", function (event) {
+          console.log(event.data);
+          // msgs.push(event.data);// 向后追加
+          msgs.unshift(event.data); // 向前追加
+          // console.log("msgs:", msgs);
+        });
+      },
+    }).mount("#app");
+
+    function getMsgs(count, offset, search) {
+
+      var res ={}
+      axios
+        .get("/get", {
+          params: {
+            count: count,
+            offset: offset,
+            search: search,
+          },
+        })
+        .then(function (response) {
+          console.log(response);
+          // return response;
+          res=response;
+        })
+        .catch(function (error) {
+          console.log(error);
+        })
+        .then(function () {
+          // always executed
+        });
+      console.log("resssss",res)
+      return res;
     }
-    #left {
-      float: left;
-      width: 50%;
-      height: 100%;
-      background-color: rgba(46, 53, 41, 0.096);
-    }
-    #right {
-      float: left;
-      width: 50%;
-      height: 100%;
-      background-color: rgb(178, 178, 224);
-    }
-  </style>
+    console.log("js run end ...");
+  </script>
+</body>
 
-  <body>
-    <div id="app"></div>
-
-    <template id="body">
-      <div id="left">
-        <h1>{{title}}</h1>
-        <ol>
-          <li v-for="msg in ctrlcMsgs">{{ msg }}</li>
-        </ol>
-      </div>
-      <div id="right">
-        <h1>{{search}}</h1>
-        <span id="zuo">
-          <input type="text" name="search" />
-          <button type="submit">查询</button>
-        </span>
-        <span id="you">
-          <p>count:</p>
-          <input type="number" :value="count" />
-          <p>offset:</p>
-          <input type="number" :value="offset" />
-        </span>
-        <ol>
-          <li v-for="msg in searchMsgs">{{ msg }}</li>
-        </ol>
-      </div>
-    </template>
-
-    <script src="vue.global.js"></script>
-    <script>
-      Vue.createApp({
-        template: "#body",
-        data() {
-          return {
-            title: "hello ctrlc !!!",
-            search: "search !!!",
-            ctrlcMsgs: [],
-            searchMsg:"",
-            count: 30,
-            offset: 0,
-            searchMsgs: [],
-          };
-        },
-        props: {},
-        computed: {},
-        watch: {
-        },
-        methods: {},
-        created() {
-          // console.log(this.ctrlcMsgs);
-          var msgs = this.ctrlcMsgs; // == msgs=this.ctrlcMsgs 都是赋值指针类型
-          const source = new EventSource("/msgs");
-          source.addEventListener("open", function (event) {
-            console.log("eventsource connection open");
-          });
-          source.addEventListener("error", function (event) {
-            if (event.target.readyState === 0) {
-              console.log("reconnecting to eventsource");
-            } else {
-              console.error("eventsource error");
-            }
-          });
-          source.addEventListener("message", function (event) {
-            console.log(event.data);
-            // msgs.push(event.data);// 向后追加
-            msgs.unshift(event.data); // 向前追加
-            // console.log("msgs:", msgs);
-          });
-        },
-      }).mount("#app");
-
-      console.log("js run end ...");
-    </script>
-
-    <script type="module">
-      /*
-    const form = document.querySelector("#chat");
-    form.sender.value = `u-${Math.random().toString(32).substr(2, 7)}`;
-    form.addEventListener("submit", async function (event) {
-      event.preventDefault();
-      const input = event.target.message;
-      const text = input.value.trim();
-      if (!text) return;
-
-      const res = await fetch("/update", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ text, sender: event.target.sender.value }),
-      });
-      if (!res.ok) {
-        console.error("could not send message", res.statusText);
-      } else {
-        console.log(await res.text());
-        input.value = "";
-      }
-    });
-
-    const source = new EventSource("/msgs");
-    source.addEventListener("open", function (event) {
-      console.log("eventsource connection open");
-    });
-    source.addEventListener("error", function (event) {
-      if (event.target.readyState === 0) {
-        console.log("reconnecting to eventsource");
-      } else {
-        console.error("eventsource error");
-      }
-    });
-    source.addEventListener("message", function (event) {
-      const el = document.createElement("div");
-      el.textContent = event.data.replace(form.sender.value, "You said");
-      document.querySelector("#messages").prepend(el);
-    });
-    */
-    </script>
-  </body>
 </html>
