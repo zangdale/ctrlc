@@ -50,7 +50,7 @@
         <input type="number" v-model="offset" />
       </span>
       <ol>
-        <li v-for="msg in searchMsgs.data.data">{{ msg.Body }}</li>
+        <li v-for="msg in searchMsgs">{{ msg }}</li>
       </ol>
     </div>
   </template>
@@ -85,8 +85,8 @@
           },
         })
         .then(function (response) {
-          // console.log(response);
-          this.searchMsgs=response.data;
+          console.log(response);
+          this.searchMsgs=response.data.data;
           console.log(this.searchMsgs);
         })
         .catch(function (error) {
