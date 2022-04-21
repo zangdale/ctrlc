@@ -20,18 +20,13 @@ func init() {
 	if f != "" {
 		dbFile = f
 	}
-
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	if err != nil {
-		panic("pwd")
-	}
-
-	dbFile = fmt.Sprintf("file:%s?_fk=1", filepath.Join(dir, "ent.db"))
-	log.Info().Str("dbFile", dbFile).Msg("show db")
 }
 
-func Init() {
+func Init(homeDir string) {
 	var err error
+	dbFile = fmt.Sprintf("file:%s?_fk=1", filepath.Join(homeDir, "ctrlc.db"))
+	log.Info().Str("dbFile", dbFile).Msg("show db")
+
 	dbc, err = sqlx.Connect("sqlite3", dbFile)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed opening connection to sqlite")

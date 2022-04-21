@@ -2,18 +2,11 @@ package main
 
 import (
 	"context"
-	"ctrlc/db"
-	"ctrlc/server"
-	"io"
-	"net/http"
-	"os"
-	"path/filepath"
 
 	"net"
 	"time"
 
-	"github.com/atotto/clipboard"
-	"github.com/judwhite/go-svc"
+	"github.com/getlantern/systray"
 	"github.com/rs/zerolog/log"
 	// "golang.design/x/clipboard"
 )
@@ -38,106 +31,13 @@ func main() {
 			ser.logFile.Close()
 		}
 	}()
-	if err := svc.Run(ser); err != nil {
-		log.Panic().Err(err).Msg("svc run")
-	}
-}
-
-type params struct {
-	ctx     context.Context
-	cancel  context.CancelFunc
-	logFile *os.File
-}
-
-func (p *params) Init(env svc.Environment) error {
-	log.Info().Msg("ctrlc server init")
-	defer log.Info().Msg("ctrlc server init ok")
-
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	if err != nil {
-		return err
+	if err := ser.Init(); err != nil {
+		log.Panic().Err(err).Msg("ser run")
 	}
 
-	logPath := filepath.Join(dir, "log.log")
-
-	f, err := os.OpenFile(logPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		return err
+	if err := ser.Start(); err != nil {
+		log.Panic().Err(err).Msg("ser run")
 	}
 
-	p.logFile = f
-	// io.MultiWriter(os.Stderr, f)
-	log.Logger = log.Output(io.MultiWriter(os.Stderr, f))
-
-	db.Init()
-	return nil
-}
-
-// Start is called after Init. This method must be non-blocking.
-func (p *params) Start() error {
-	log.Info().Msg("ctrlc server start")
-	defer log.Info().Msg("ctrlc server start ok")
-
-	go func() {
-		ticker := time.NewTicker(time.Second)
-		oldText := ""
-		for range ticker.C {
-			select {
-			case <-p.ctx.Done():
-				ticker.Stop()
-				return
-			default:
-				text, err := clipboard.ReadAll()
-				if err != nil {
-					log.Error().Err(err).Msg("read all")
-					err = nil
-				}
-				// b := clipboard.Read(clipboard.FmtText)
-				// text := string(b)
-				if text != "" && oldText != text {
-					oldText = text
-					log.Debug().Msg(text)
-					server.AddMsg(text)
-					db.SaveCopyMsg(p.ctx, text)
-				}
-
-			}
-		}
-	}()
-
-	port := ":9977"
-	server := &http.Server{Addr: port, Handler: server.Init()}
-	go func() {
-		e := make(chan error)
-		go func(re chan error) {
-			if err := server.ListenAndServe(); err != nil {
-				re <- err
-			}
-		}(e)
-		log.Info().Str("port", port).Msg("http server")
-
-		select {
-		case <-p.ctx.Done():
-			if err := server.Close(); err != nil {
-				log.Error().Err(err).Msg("http close")
-			}
-		case err := <-e:
-			log.Error().Err(err).Msg("http server")
-		}
-
-	}()
-
-	return nil
-}
-
-// Stop is called in response to syscall.SIGINT, syscall.SIGTERM, or when a
-// Windows Service is stopped.
-func (p *params) Stop() error {
-	log.Info().Msg("ctrlc server stop")
-	defer log.Info().Msg("ctrlc server stop ok")
-	p.cancel()
-	db.Close()
-	// p.logFile.Close()
-
-	return nil
+	systray.Run(onReady(ser.webUrl), onExit(ser))
 }
