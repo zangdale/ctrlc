@@ -1,5 +1,6 @@
 
 
 build:
-	go build -o ./minigui/ctrlc.app/Contents/MacOS/ctrlc .
+	go build .
+	cp ./ctrlc ./minigui/ctrlc.app/Contents/MacOS/
 	

@@ -65,6 +65,8 @@ func getHandle(w http.ResponseWriter, req *http.Request) {
 	offset := QueryInt(req.URL, "offset", 0)
 	searchStr := QueryStr(req.URL, "search", "")
 
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
 	res, err := db.GetMsgs(count, offset, searchStr)
 	if err != nil {
 		resp.Info().Err(err).Str("handle", "get").Msg("error")
