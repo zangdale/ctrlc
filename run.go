@@ -12,10 +12,10 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"time"
 
-	"github.com/atotto/clipboard"
+	// "github.com/atotto/clipboard"
 	"github.com/rs/zerolog/log"
+	"golang.design/x/clipboard"
 )
 
 type params struct {
@@ -57,29 +57,18 @@ func (p *params) Start() error {
 	defer log.Info().Msg("ctrlc server start ok")
 
 	go func() {
-		ticker := time.NewTicker(time.Second)
 		oldText := ""
-		for range ticker.C {
-			select {
-			case <-p.ctx.Done():
-				ticker.Stop()
-				return
-			default:
-				text, err := clipboard.ReadAll()
-				if err != nil {
-					log.Error().Err(err).Msg("read all")
-					err = nil
-				}
-				// b := clipboard.Read(clipboard.FmtText)
-				// text := string(b)
-				if text != "" && oldText != text {
-					oldText = text
-					log.Debug().Msg(text)
-					server.AddMsg(text)
-					db.SaveCopyMsg(p.ctx, text)
-				}
-
+		textC := clipboard.Watch(p.ctx, clipboard.FmtText)
+		for b := range textC {
+			// b := clipboard.Read(clipboard.FmtText)
+			text := string(b)
+			if text != "" && oldText != text {
+				oldText = text
+				log.Debug().Msg(text)
+				server.AddMsg(text)
+				db.SaveCopyMsg(p.ctx, text)
 			}
+
 		}
 	}()
 
