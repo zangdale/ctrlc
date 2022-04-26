@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"ctrlc/conf"
 	"ctrlc/db"
 	"ctrlc/server"
 	"ctrlc/utils"
@@ -24,6 +25,7 @@ type params struct {
 	logFile *os.File
 	webUrl  string
 	homeDir string
+	conf    *conf.Conf
 }
 
 func (p *params) Init() error {
@@ -36,6 +38,8 @@ func (p *params) Init() error {
 		return err
 	}
 	p.homeDir = dir
+	p.conf = conf.Init(p.homeDir)
+
 	logPath := filepath.Join(p.homeDir, "log.log")
 
 	f, err := os.OpenFile(logPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
@@ -72,12 +76,12 @@ func (p *params) Start() error {
 		}
 	}()
 
-	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	ln, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", p.conf.Port))
 	if err != nil {
 		return err
 	}
 	p.webUrl = fmt.Sprintf("http://%s", ln.Addr().String())
-	server := &http.Server{Handler: server.Init()}
+	server := &http.Server{Handler: server.Init(p.conf.WebDir)}
 	go func() {
 		e := make(chan error)
 		go func(re chan error) {
