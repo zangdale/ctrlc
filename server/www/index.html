@@ -10,20 +10,42 @@
   body {
     padding: 0;
     margin: 0;
+    background-color: lightblue;
   }
 
-  #left {
-    float: left;
-    width: 50%;
-    height: 100%;
-    background-color: rgba(46, 53, 41, 0.096);
+  h1 {
+    color: white;
+    text-align: center;
   }
 
-  #right {
-    float: left;
-    width: 50%;
-    height: 100%;
-    background-color: rgb(178, 178, 224);
+  #msgg {
+    text-align: center;
+  }
+
+  .pmsg {
+    /* background-color: #4CAF50; */
+    font-size: 16px;
+    color: rgb(119, 164, 138);
+    padding: 5px 8px;
+  }
+
+  #mbutton {
+    background-color: #93cd94;
+    border: none;
+    color: white;
+    padding: 1px 8px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+  }
+  .omsg{
+    background-color: #caefcb;
+    margin: 10px;
+  }
+  .lmsg{
+    margin: 10px;
+    color: rgb(71, 112, 87);
   }
 </style>
 
@@ -31,28 +53,19 @@
   <div id="app"></div>
 
   <template id="body">
-    <div id="left">
-      <h1>{{title}}</h1>
-      <ol>
-        <li v-for="msg in ctrlcMsgs">{{ msg }}</li>
-      </ol>
-    </div>
-    <div id="right">
-      <h1>{{search}}</h1>
-      <span id="zuo">
-        <input type="text" name="search" v-model="searchMsg" />
-        <button type="submit" @click="getAndSearchMsgs">查询</button>
-      </span>
-      <span id="you">
-        <p>count:</p>
-        <input type="number" v-model="count" />
-        <p>offset:</p>
-        <input type="number" v-model="offset" />
-      </span>
-      <ol>
-        <li v-for="m in searchMsgs">{{m.Body}}</li>
-      </ol>
-    </div>
+    <h1>{{title}}</h1>
+    <span id="msgg">
+      <p class="pmsg">内容: <input type="text" name="search" v-model="searchMsg" /></p>
+      <p class="pmsg">数量: <input type="number" v-model="count" /></p>
+      <p class="pmsg">偏移量: <input type="number" v-model="offset" /></p>
+      <p class="pmsg"><button id="mbutton" type="submit" @click="getAndSearchMsgs">查询</button></p>
+    </span>
+    <ol class="omsg">
+      <li class="lmsg" v-for="msg in ctrlcMsgs">{{ msg }}</li>
+    </ol>
+    <ol class="omsg">
+      <li class="lmsg" v-for="m in searchMsgs">{{m.Body}}</li>
+    </ol>
   </template>
 
   <script src="vue.global.js"></script>
@@ -84,12 +97,12 @@
                 search: this.searchMsg,
               },
             })
-            .then((response)=>{
+            .then((response) => {
               // console.log(response);
               this.searchMsgs = response.data.data;
               // console.log(msgs);
             })
-            .catch((error)=>{
+            .catch((error) => {
               console.log(error);
             });
 
