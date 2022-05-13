@@ -7,14 +7,14 @@ import (
 	"github.com/skratchdot/open-golang/open"
 )
 
-func onReady(webUrl string) func() {
+func onReady(s *params) func() {
 	return func() {
 		systray.SetTemplateIcon(icon.Data, icon.Data)
 		//systray.SetTitle("CtrlC")
 		systray.SetTooltip("CtrlC")
 
 		mPref := systray.AddMenuItem("Open Web", "Open Web")
-		//mLog := systray.AddMenuItem("Logs", "See Logs")
+		mBackup := systray.AddMenuItem("BackUp", "Run backup.sh")
 		mQuit := systray.AddMenuItem("Quit", "Quit")
 		systray.AddSeparator()
 		mAboutLink := systray.AddMenuItem("About", "About Me!")
@@ -24,10 +24,10 @@ func onReady(webUrl string) func() {
 			case <-mAboutLink.ClickedCh:
 				open.Run("https://space.bilibili.com/278413353")
 			case <-mPref.ClickedCh:
-				open.Run(webUrl)
+				open.Run(s.webUrl)
 
-			//case <-mLog.ClickedCh:
-			// logWindow.Show()
+			case <-mBackup.ClickedCh:
+				go backup(s.homeDir, s.dbPath)
 
 			case <-mQuit.ClickedCh:
 				systray.Quit()

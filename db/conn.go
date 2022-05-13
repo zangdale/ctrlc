@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/rs/zerolog/log"
@@ -22,9 +21,9 @@ func init() {
 	}
 }
 
-func Init(homeDir string) {
+func Init(dbPath string) {
 	var err error
-	dbFile = fmt.Sprintf("file:%s?_fk=1", filepath.Join(homeDir, "ctrlc.db"))
+	dbFile = fmt.Sprintf("file:%s?_fk=1", dbPath)
 	log.Info().Str("dbFile", dbFile).Msg("show db")
 
 	dbc, err = sqlx.Connect("sqlite3", dbFile)

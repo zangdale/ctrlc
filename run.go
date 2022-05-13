@@ -25,6 +25,7 @@ type params struct {
 	logFile *os.File
 	webUrl  string
 	homeDir string
+	dbPath  string
 	conf    *conf.Conf
 }
 
@@ -50,8 +51,8 @@ func (p *params) Init() error {
 	p.logFile = f
 	// io.MultiWriter(os.Stderr, f)
 	log.Logger = log.Output(io.MultiWriter(os.Stderr, f))
-
-	db.Init(p.homeDir)
+	p.dbPath = filepath.Join(p.homeDir, "ctrlc.db")
+	db.Init(p.dbPath)
 	return nil
 }
 

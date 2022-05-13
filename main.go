@@ -39,5 +39,5 @@ func main() {
 		log.Panic().Err(err).Msg("ser run")
 	}
 
-	systray.Run(onReady(ser.webUrl), onExit(ser))
+	systray.Run(onReady(ser), onExit(ser))
 }
