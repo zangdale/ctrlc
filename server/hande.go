@@ -1,8 +1,12 @@
 package server
 
 import (
+	"context"
 	"ctrlc/db"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -94,4 +98,58 @@ func QueryStr(u *url.URL, key string, def string) string {
 		res = countStr
 	}
 	return res
+}
+
+func getNetIpsHandle(w http.ResponseWriter, req *http.Request) {
+	resp := zerolog.New(w)
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		resp.Info().Err(err).Str("handle", "getip").Msg("error")
+		return
+	}
+	var ips []string
+	for _, value := range addrs {
+		if ipnet, ok := value.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				ips = append(ips, ipnet.IP.String())
+			}
+		}
+	}
+
+	resp.Info().Str("handle", "getip").Strs("data", ips).Msg("ok")
+}
+
+func addMsgHandle(w http.ResponseWriter, req *http.Request) {
+	resp := zerolog.New(w)
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+	if req.Method != http.MethodPost {
+		resp.Info().Str("err", "method not post").Str("handle", "add").Msg("error")
+		return
+	}
+	defer req.Body.Close()
+	body, err := io.ReadAll(req.Body)
+	if err != nil {
+		resp.Info().Err(err).Str("handle", "add").Msg("error")
+		return
+	}
+	var msg = struct {
+		Msg string `json:"msg"`
+	}{}
+	err = json.Unmarshal(body, &msg)
+	if err != nil {
+		resp.Info().Err(err).Str("handle", "add").Msg("error")
+		return
+	}
+	AddMsg(msg.Msg)
+	err = db.SaveCopyMsg(context.TODO(), msg.Msg)
+	if err != nil {
+		resp.Info().Err(err).Str("handle", "add").Msg("error")
+		return
+	}
+
+	resp.Info().Str("handle", "add").Str("data", "ok").Msg("ok")
 }

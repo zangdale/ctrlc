@@ -29,10 +29,11 @@
     padding: 5px 8px;
   }
 
-  #mbutton {
+  .mbutton {
     background-color: #93cd94;
     border: none;
     color: white;
+    margin-left: 10px;
     padding: 1px 8px;
     text-align: center;
     text-decoration: none;
@@ -55,11 +56,21 @@
   <template id="body">
     <h1>{{title}}</h1>
     <span id="msgg">
+      <p class="pmsg">
+        消息: <input type="text" name="search" v-model="addMsg" />
+        <button class="mbutton" type="submit" @click="addMsgFunc">添加消息</button>
+      </p>
       <p class="pmsg">内容: <input type="text" name="search" v-model="searchMsg" /></p>
       <p class="pmsg">数量: <input type="number" v-model="count" /></p>
       <p class="pmsg">偏移量: <input type="number" v-model="offset" /></p>
-      <p class="pmsg"><button id="mbutton" type="submit" @click="getAndSearchMsgs">查询</button></p>
+      <p class="pmsg">
+        <button class="mbutton" type="submit" @click="getIps">获取IPs</button>
+        <button class="mbutton" type="submit" @click="getAndSearchMsgs">查询</button>
+      </p>
     </span>
+    <ol class="omsg">
+      <li class="lmsg" v-for="ip in ips">{{ip}}</li>
+    </ol>
     <ol class="omsg">
       <li class="lmsg" v-for="msg in ctrlcMsgs">{{ msg }}</li>
     </ol>
@@ -78,6 +89,8 @@
           title: "hello ctrlc !!!",
           search: "search !!!",
           ctrlcMsgs: [],
+          ips:[],
+          addMsg:"",
           searchMsg: "",
           count: 30,
           offset: 0,
@@ -108,6 +121,31 @@
 
           // this.searchMsgs = msgs;
           console.log(this.searchMsgs);
+        },
+        getIps(){
+          axios.get("/getips")
+            .then((response) => {
+              // console.log(response);
+              this.ips = response.data.data;
+              // console.log(msgs);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+          console.log(this.ips);
+        },
+        addMsgFunc(){
+          let data = {"msg":this.addMsg}
+          axios.post("/addmsg",data)
+            .then((response) => {
+              console.log(response.data.data);
+              // this.ips = response.data.data;
+              // console.log(msgs);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+          // console.log(this.ips);
         },
       },
       created() {

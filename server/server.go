@@ -24,6 +24,8 @@ func Init(webDir string) *http.ServeMux {
 	mux.HandleFunc("/msgs", msgHandle)
 	mux.HandleFunc("/get", getHandle)
 	// mux.HandleFunc("/search", searchHandle)
+	mux.HandleFunc("/getips", getNetIpsHandle)
+	mux.HandleFunc("/addmsg", addMsgHandle)
 
 	return mux
 }

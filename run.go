@@ -6,6 +6,8 @@ import (
 	"ctrlc/db"
 	"ctrlc/server"
 	"ctrlc/utils"
+	"strconv"
+	"strings"
 
 	"fmt"
 	"io"
@@ -24,6 +26,7 @@ type params struct {
 	cancel  context.CancelFunc
 	logFile *os.File
 	webUrl  string
+	webPort uint64
 	homeDir string
 	dbPath  string
 	conf    *conf.Conf
@@ -77,11 +80,17 @@ func (p *params) Start() error {
 		}
 	}()
 
-	ln, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", p.conf.Port))
+	ln, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", p.conf.Port))
 	if err != nil {
 		return err
 	}
-	p.webUrl = fmt.Sprintf("http://%s", ln.Addr().String())
+
+	ss := strings.Split(ln.Addr().String(), ":")
+	p.webPort, err = strconv.ParseUint(ss[len(ss)-1], 10, 64)
+	if err != nil {
+		return err
+	}
+	p.webUrl = fmt.Sprintf("http://127.0.0.1:%d", p.webPort)
 	server := &http.Server{Handler: server.Init(p.conf.WebDir)}
 	go func() {
 		e := make(chan error)
