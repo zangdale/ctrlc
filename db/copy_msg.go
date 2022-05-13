@@ -27,6 +27,9 @@ type CopyMags struct {
 }
 
 func SaveCopyMsg(ctx context.Context, text string) error {
+	if text == "" {
+		return nil
+	}
 	_, err := dbc.MustExec("INSERT INTO copy_msgs (body, 'from', created_at) VALUES ($1,$2,$3)",
 		text, fromSystem, time.Now()).LastInsertId()
 	return err
