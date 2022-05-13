@@ -1,6 +1,7 @@
 #!/bin/bash
 
-echo $0 >> log.l
-echo $1 >> log.l
-echo $2 >> log.l
-echo "h" >> log.l
+DBPATH=$1
+HOMEDIR=$2
+DATE=`date '+%Y-%m-%d %H:%M:%S'`
+
+echo "${DATE} >>>> ${DBPATH} ${HOMEDIR}" >> backup.log
