@@ -2,6 +2,7 @@
 *.db
 *.backup
 *.log
+.vscode/
 
 ctrlc
 ctrlc.exe
