@@ -53,7 +53,7 @@ func (p *params) Init() error {
 
 	p.logFile = f
 	// io.MultiWriter(os.Stderr, f)
-	log.Logger = log.Output(io.MultiWriter(os.Stderr, f))
+	log.Logger = log.Output(io.MultiWriter(os.Stdout, f))
 	p.dbPath = filepath.Join(p.homeDir, "ctrlc.db")
 	db.Init(p.dbPath)
 	return nil
